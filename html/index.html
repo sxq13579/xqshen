@@ -5,34 +5,6 @@
 	<title>vue-index</title>
 </head>
 <body>
-	<div id="app">
-		<p>{{message}}</p>
-	</div>
-	<div id="app-2">
-		<span v-bind:title="message">
-			鼠标悬停几秒钟查看此动态绑定的提示信息
-		</span>
-	</div>
-	<div id="app-3">
-		<p v-if="seen">现在你看到我了</p>
-		<p v-show="haha">静静的</p>
-	</div>
-	<div id="app-4">
-		<ol>
-		<!-- <li v-for="(todo, index) in todos">  -->
-		<li v-for="(todo, index) of todos"> 
-				{{index}}--{{ todo.text }}
-			</li>
-		</ol>
-	</div>
-	<div id="app-5">
-		<p>{{ message }}</p>
-		<button v-on:click="reverseMessage">逆转消息</button>
-	</div>
-	<div id="app-6">
-		<p>{{ message }}</p>
-		<input v-model="message">
-	</div>
 	<div id="app-7">
 		<ol>
 			<todo-item v-for="item in groceryList" v-bind:todo="item"></todo-item>
@@ -44,64 +16,17 @@
 		</ul>
 		<span v-for="n in even(numbers)">{{n}}</span>
 	</div>
-	<div id="example">
-		<p>Original message: "{{ message }} haha {{ now }}"</p>
-		<p>Computed reversed message: "{{ reversedMessage() }}"</p>
+
+	<div id="counter-event-example">
+	  	<p>{{ total }}</p>
+	  	<button-counter v-on:increment="incrementTotal"></button-counter>
+	  	<button-counter v-on:increment="incrementTotal"></button-counter>
+	  	<currency-input v-model="price"></currency-input>
 	</div>
-	<div id="demo">{{ fullName }}</div>
-	<div v-if="Math.random() > 0.5">Now you see me</div><div v-else>Now you don't</div>
+
+
 	<script src="../js/vue.js"></script>
 	<script>
-		var app = new Vue({
-			el: "#app",
-			data: {
-				message: 'Hello Vue.js!'
-			}
-		});
-		var app2 = new Vue({
-			el: '#app-2',
-			data: {
-				message: '页面加载于' + new Date()
-			}
-		});
-		var app3 = new Vue({
-			el: '#app-3',
-			data: {
-				seen: true,
-				haha: false
-			}
-		});
-		var app4 = new Vue({
-			el: "#app-4",
-			data: {
-				todos: [
-					{ text: '学习Javascript'},
-					{ text: '学习Vue'},
-					{ text: '学习牛项目'}
-				]
-			}
-		});
-		var app5 = new Vue({
-			el: '#app-5',
-			data: {
-				message: 'Hello Vue.js!'
-			},
-			methods: {
-				reverseMessage: function() {
-					this.message = this.message.split('').reverse().join('')
-				}
-			}
-		});
-		var app6 = new Vue({
-			el: '#app-6',
-			data: {
-				message: 'Hello Vue!'
-			}
-		});
-		Vue.component('todo-item', {
-			props: ['todo'],
-			template: '<li>{{ todo.text }}</li>'
-		})
 		var app7 = new Vue({
 			el: '#app-7',
 			data: {
@@ -125,58 +50,62 @@
 				}
 			}
 		});
-		var vm = new Vue({
-			el: "#example",
-			data: {
-				message: 'Hello'
-			},
-			computed: {
-				reversedMessage: function() {
-					return this.message.split('').reverse().join('')
-				},
-				now: function() {
-					return Date.now()
-				}
-			},
-			methods: {
-				reversedMessage: function() {
-					return this.message.split('').reverse().join('')
-				}
-			}
-		});
-		var demo = new Vue({
-			el: '#demo',
-			data: {
-				firstName: 'Foo',
-				lastName: 'Bar',
-				fullName: 'Foo Bar'
-			},
-			// watch: {
-			// 	firstName: function (val) {
-			// 		this.fullName = val + ' ' + this.lastName
-			// 	},
-			// 	lastName: function (val) {
-			// 		this.fullName = this.firstName + ' ' + val
-			// 	}
-			// }
-			computed: {
-				// fullName : function () {
-				// 	return this.firstName + ' ' + this.lastName
-				// }
-				fullName: {
-				    // getter
-				    get: function () {
-				      return this.firstName + ' ' + this.lastName
-				    },
-				    // setter
-				    set: function (newValue) {
-				      var names = newValue.split(' ')
-				      this.firstName = names[0]
-				      this.lastName = names[names.length - 1]
-				    }
-				}
-			}
-		});
+
+		Vue.component('button-counter', {
+		  template: '<button v-on:click="increment">{{ counter }}</button>',
+		  data: function () {
+		    return {
+		      counter: 0
+		    }
+		  },
+		  methods: {
+		    increment: function () {
+		      this.counter += 1
+		      this.$emit('increment')
+		    }
+		  },
+		})
+		new Vue({
+		  el: '#counter-event-example',
+		  data: {
+		    total: 0
+		  },
+		  methods: {
+		    incrementTotal: function () {
+		      this.total += 1
+		    }
+		  }
+		})
+
+	Vue.component('currency-input', {
+	  template: '\
+	    <span>\
+	      $\
+	      <input\
+	        ref="input"\
+	        v-bind:value="value"\
+	        v-on:input="updateValue($event.target.value)"\
+	      >\
+	    </span>\
+	  ',
+	  props: ['value'],
+	  methods: {
+	    // 不是直接更新值，而是使用此方法来对输入值进行格式化和位数限制
+	    updateValue: function (value) {
+	      var formattedValue = value
+	        // 删除两侧的空格符
+	        .trim()
+	        // 保留 2 小数位
+	        .slice(0, value.indexOf('.') + 3)
+	      // 如果值不统一，手动覆盖以保持一致
+	      if (formattedValue !== value) {
+	        this.$refs.input.value = formattedValue
+	      }
+	      // 通过 input 事件发出数值
+	      this.$emit('input', Number(formattedValue))
+	    }
+	  }
+	})
 	</script>
 </body>
 </html>
