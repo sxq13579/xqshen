@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Vue list</title>
+    <link href="https://cdn.jsdelivr.net/npm/animate.css@3.5.1" rel="stylesheet" type="text/css">
+    <style type="text/css">
+    body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+    #tree {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .flip-list-move {
+        transition: transform 1s;
+    }
+
+    .fade-enter-active,
+    .fade-leave-active {
+        transition: opacity .5s
+    }
+    </style>
+</head>
+
+<body>
+    <div id="flip-list-demo" class="demo">
+        <button v-on:click="shuffle">Shuffle</button>
+        <transition-group name="flip-list" tag="ul">
+            <li v-for="item in items" v-bind:key="item">
+                {{ item }}
+            </li>
+        </transition-group>
+        <canvas id="tree"></canvas>
+    </div>
+    <script src="../js/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.14.1/lodash.min.js"></script>
+    <script>
+    new Vue({
+        el: '#flip-list-demo',
+        data: {
+            show: true,
+            items: ['px到rem对于移动端的适配', 'H5中canvas绘图', 'PHP代码对ajax请求的中转',
+                '百度地图定位功能', '天气数据获取', '移动视频播放知识点', '微信jdk开发', 'webpack相关', 'cms模板'
+            ],
+            number: 1,
+            family: []
+        },
+        mounted() {
+            this.drawCanvas()
+        },
+        methods: {
+            shuffle: function() {
+                this.items = _.shuffle(this.items)
+            },
+            drawCanvas() {
+                var Branch = function() {
+                    this.canvas = canvas;
+                    this.context = canvas.getContext("2d");
+                    this.x = canvas.width / 2;
+                    this.y = canvas.height;
+                    this.radius = 10;
+                    this.angle = Math.PI / 2;
+
+                    this.fillStyle = "#000";
+                    this.shadowColor = "#000";
+                    this.shadowBlur = 2;
+
+                    this.speed = width / 500;
+                    this.generation = 0;
+                    this.distance = 0;
+                };
+
+                Branch.prototype = {
+                    // 主要的处理过程发生在这里
+                    process: function() {
+                        // 在当前的坐标处画出一个圆形
+                        this.draw();
+                        // 把当前的branch继续向上延伸一部分
+                        this.iterate();
+                        this.split();
+                        this.die();
+                    },
+
+                    draw: function() {
+                        var context = this.context;
+                        console.log(this.x, this.y, this.radius);
+                        context.save();
+                        context.fillStyle = this.fillStyle;
+                        context.shadowColor = this.shadowColor;
+                        context.shadowBlur = this.shadowBlur;
+                        context.beginPath();
+                        context.moveTo(this.x, this.y);
+                        // 图形是依靠在各个坐标处画出的圆形组合而成
+                        context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, true);
+                        context.closePath();
+                        context.fill();
+                        context.restore();
+                    },
+
+                    iterate: function() {
+                        var deltaX = this.speed * Math.cos(this.angle);
+                        var deltaY = -this.speed * Math.sin(this.angle);
+
+                        // 利用speed控制需要向上延伸的距离
+                        this.x += deltaX;
+                        this.y += deltaY;
+                        // 根据当前是第几代，减小半径值
+                        this.radius *= (0.99 - this.generation / 250);
+                        console.log(this.generation, this.radius)
+
+                        // 求出距离的增量
+                        var deltaDistance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
+
+                        // distance指的是当前的这一段树枝的长度
+                        this.distance += deltaDistance;
+
+                        // 控制speed的大小，使绘图时不至于在两个圆之间出现空白
+                        if (this.speed > this.radius * 1.5) {
+                            this.speed = this.radius * 1.5;
+                        }
+
+                        // 产生一个范围在（-0.1, 0.1)之间的随机数,对角度进行一个偏转
+                        this.angle += Math.random() / 5 - 1 / 5 / 2;
+                    },
+
+                    split: function() {
+                        var splitChance = 0;
+                        // 树干部分，长度大于画面高度1/5时开始分叉
+                        if (this.generation == 1)
+                            splitChance = this.distance / height - 0.2;
+                        // 树枝部分
+                        else if (this.generation < 3)
+                            splitChance = this.distance / height - 0.1;
+
+                        if (Math.random() * 1.5 < splitChance) {
+                            console.log(Math.random() * 1.5, splitChance, '-----------')
+                            // 下一代生成n个树枝
+                            var n = 2 + Math.round(Math.random() * 3);
+                            for (var i = 0; i < n; i++) {
+                                var branch = new Branch();
+                                branch.x = this.x;
+                                branch.y = this.y;
+                                branch.angle = this.angle;
+                                branch.radius = this.radius * 0.85;
+                                branch.generation++;
+                                branch.fillStyle = this.fillStyle;
+
+                                // 将branch加入到集合中去
+                                branches.add(branch);
+                                console.log(this.x, this.y, this.angle)
+                            }
+                            // 将父代branch删去
+                            branches.remove(this);
+                        }
+                    },
+                    die: function() {
+                        if (this.radius < 5) {
+                            branches.remove(this);
+                        }
+                    }
+                };
+
+                var BranchCollection = function() {
+                    this.branches = [];
+                    this.canvas = canvas;
+                }
+
+                BranchCollection.prototype = {
+                    add: function(branch) {
+                        this.branches.push(branch);
+                    },
+
+                    // 依次处理集合内的每一个元素
+                    process: function() {
+                        for (var b in this.branches) {
+                            this.branches[b].process();
+                        }
+                    },
+
+                    remove: function(branch) {
+                        for (var b in this.branches)
+                            if (this.branches[b] === branch)
+                                this.branches.splice(b, 1);
+                    }
+                }
+
+                var width = window.innerWidth;
+                var height = window.innerHeight;
+                var canvas = document.getElementById("tree");
+                canvas.width = width;
+                canvas.height = height;
+
+                // 设置初始的数量
+                // var n = 2 + Math.random() * 3;
+
+                // 设定初始的半径大小
+                var initialRadius = width / 50;
+
+                // 新建一个集合用于放置所有的branch
+                branches = new BranchCollection();
+                branch = new Branch();
+                // 以canvas的中点为基准，左右各占一个initialRadius的宽度
+                // 根据序号i算出初始x坐标
+                branch.x = width / 2 - initialRadius;
+                branch.radius = initialRadius;
+                // 将新的branch加入集合中去
+                branches.add(branch);
+
+                var interval = setInterval(function() {
+                    // 对集合内的每个元素依次进行处理
+                    branches.process();
+                    if (branches.branches.length == 0) {
+                        clearInterval(interval);
+                    }
+
+                }, 100);
+
+
+
+            }
+        }
+    })
+    </script>
+</body>
+
+</html>
