@@ -27,9 +27,11 @@
         overflow: hidden;
     }
     #tree {
-      position: absolute;
+      position: fixed;
       top: 0;
+      bottom: 0;
       left: 0;
+      right: 0;
       width: 100%;
       height: 100%;
       z-index: -1;
@@ -52,6 +54,7 @@
         display: flex;
     }
     #flip-list li {
+        position: relative;
         width: 9%;
         margin: 10px;
         font-size: 24px;
@@ -77,8 +80,8 @@
         <transition-group name="flip-list" tag="ul">
             <li v-for="item in items" v-bind:key="item">{{ item }}</li>
         </transition-group>
-        <canvas id="tree"></canvas>
     </div>
+    <canvas id="tree"></canvas>
     <script src="../js/vue.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.14.1/lodash.min.js"></script>
     <script>
@@ -87,13 +90,46 @@
         data: {
             show: true,
             items: ['px TO rem', 'H5\'s canvas', 'PHP and ajax','BMap', 'weather', 'video', 'wx SDK', 'webpack && vue', 'cms', 'CSS && sass'],
-            number: 1,
-            family: []
+            liItems: [],
+            width: window.innerWidth,
+            height: window.innerHeight,
+            canvas: document.getElementById("tree")
         },
         mounted() {
-            // this.drawCanvas()
+            this.$nextTick(() => {
+                this.canvas.width = this.width;
+                this.canvas.height = this.height;
+                this.pageInit();
+                // this.drawCanvas()
+            })
         },
         methods: {
+            pageInit: function() {
+                let that = this;
+                document.querySelectorAll('#flip-list li').forEach(function(item) {
+                    let pointX = item.offsetLeft + item.offsetWidth / 2;
+                    let pointY = item.offsetTop + item.offsetHeight / 2;
+                    console.log(pointX, pointY);
+                    that.liItems.push({
+                        x: pointX,
+                        y: pointY
+                    });
+                    that.drawPoints(pointX, pointY);
+                })
+                console.log(this.liItems);
+            },
+            drawPoints (pointX, pointY) {
+                let cxt = document.getElementById("tree").getContext("2d");
+                // context.save();
+                cxt.fillStyle = '#f00';
+                cxt.beginPath();
+                cxt.moveTo(pointX, pointY);
+                // 图形是依靠在各个坐标处画出的圆形组合而成
+                cxt.arc(pointX, pointY, 5, 0, 2 * Math.PI, true);
+                cxt.closePath();
+                cxt.fill();
+                // cxt.restore();
+            },
             shuffle: function() {
                 this.items = _.shuffle(this.items)
             },
@@ -114,7 +150,6 @@
                     this.generation = 0;
                     this.distance = 0;
                 };
-
                 Branch.prototype = {
                     // 主要的处理过程发生在这里
                     process: function() {
@@ -201,13 +236,11 @@
                             branches.remove(this);
                         }
                     }
-                };
-
+                }
                 var BranchCollection = function() {
                     this.branches = [];
                     this.canvas = canvas;
-                }
-
+                };
                 BranchCollection.prototype = {
                     add: function(branch) {
                         this.branches.push(branch);
@@ -226,7 +259,6 @@
                                 this.branches.splice(b, 1);
                     }
                 }
-
                 var width = window.innerWidth;
                 var height = window.innerHeight;
                 var canvas = document.getElementById("tree");
