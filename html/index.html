@@ -10,32 +10,36 @@
         font-family: 'iconfont';
         src: url('../css/fonts/TrixieCyr.eot');
         src: url('../css/fonts/TrixieCyr.eot?#iefix') format('embedded-opentype'),
-            url('../css/fonts/TrixieCyr-Plain.otf') format('otf'),
-            url('../css/fonts/TrixieCyr.woff2') format('woff2'),
-            url('../css/fonts/TrixieCyr.woff') format('woff'),
-            url('../css/fonts/TrixieCyr.ttf') format('truetype'),
-            url('../css/fonts/TrixieCyr.svg#iconfont') format('svg');
+        url('../css/fonts/TrixieCyr-Plain.otf') format('otf'),
+        url('../css/fonts/TrixieCyr.woff2') format('woff2'),
+        url('../css/fonts/TrixieCyr.woff') format('woff'),
+        url('../css/fonts/TrixieCyr.ttf') format('truetype'),
+        url('../css/fonts/TrixieCyr.svg#iconfont') format('svg');
         font-weight: normal;
         font-style: normal;
     }
+
     .trixie {
         font-family: "iconfont";
     }
+
     body {
         margin: 0;
         padding: 0;
         overflow: hidden;
     }
+
     #tree {
-      position: fixed;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
     }
+
     #flip-list button {
         display: block;
         margin: 20px auto;
@@ -45,14 +49,18 @@
         padding: .4em .6em .7em .6em;
         outline: none;
         border-top: 1px solid #fffc;
-        text-shadow: rgba(255,255,255,.5) 0 1px 0;
+        text-shadow: rgba(255, 255, 255, .5) 0 1px 0;
         border-radius: 5em 1em / 5em 1em;
-        box-shadow: inset rgba(255,254,255,0.6) 0 0.3em .3em, inset rgba(0,0,0,0.15) 0 -0.1em .3em, /* inner shadow */ hsl(340, 70%, 50%) 0 .1em 3px, hsl(340, 80%, 40%) 0 .3em 1px, /* color border */ rgba(0,0,0,0.2) 0 .5em 5px;
-        background-image: -webkit-gradient(radial, 50% 0, 100, 50% 0, 0, from( #fff0 ), to( #ffffffb3 )), url(noise.png);
+        box-shadow: inset rgba(255, 254, 255, 0.6) 0 0.3em .3em, inset rgba(0, 0, 0, 0.15) 0 -0.1em .3em, /* inner shadow */
+        hsl(340, 70%, 50%) 0 .1em 3px, hsl(340, 80%, 40%) 0 .3em 1px, /* color border */
+        rgba(0, 0, 0, 0.2) 0 .5em 5px;
+        background-image: -webkit-gradient(radial, 50% 0, 100, 50% 0, 0, from( #fff0), to( #ffffffb3)), url(noise.png);
     }
+
     #flip-list ul {
         display: flex;
     }
+
     #flip-list li {
         position: relative;
         width: 9%;
@@ -63,6 +71,7 @@
         border-radius: 50%;
         border: 1px solid pink;
     }
+
     .flip-list-move {
         transition: transform 1s;
     }
@@ -89,7 +98,7 @@
         el: '#flip-list',
         data: {
             show: true,
-            items: ['px TO rem', 'H5\'s canvas', 'PHP and ajax','BMap', 'weather', 'video', 'wx SDK', 'webpack && vue', 'cms', 'CSS && sass'],
+            items: ['px TO rem', 'H5\'s canvas', 'PHP and ajax', 'BMap', 'weather', 'video', 'wx SDK', 'webpack && vue', 'cms', 'CSS && sass'],
             liItems: [],
             width: window.innerWidth,
             height: window.innerHeight,
@@ -100,7 +109,7 @@
                 this.canvas.width = this.width;
                 this.canvas.height = this.height;
                 this.pageInit();
-                // this.drawCanvas()
+                this.drawCanvas()
             })
         },
         methods: {
@@ -109,18 +118,16 @@
                 document.querySelectorAll('#flip-list li').forEach(function(item) {
                     let pointX = item.offsetLeft + item.offsetWidth / 2;
                     let pointY = item.offsetTop + item.offsetHeight / 2;
-                    console.log(pointX, pointY);
                     that.liItems.push({
                         x: pointX,
                         y: pointY
                     });
                     that.drawPoints(pointX, pointY);
                 })
-                console.log(this.liItems);
             },
-            drawPoints (pointX, pointY) {
-                let cxt = document.getElementById("tree").getContext("2d");
-                // context.save();
+            drawPoints(pointX, pointY) {
+                let cxt = this.canvas.getContext("2d");
+                cxt.save();
                 cxt.fillStyle = '#f00';
                 cxt.beginPath();
                 cxt.moveTo(pointX, pointY);
@@ -128,12 +135,13 @@
                 cxt.arc(pointX, pointY, 5, 0, 2 * Math.PI, true);
                 cxt.closePath();
                 cxt.fill();
-                // cxt.restore();
+                cxt.restore();
             },
             shuffle: function() {
                 this.items = _.shuffle(this.items)
             },
             drawCanvas() {
+                let that = this;
                 var Branch = function() {
                     this.canvas = canvas;
                     this.context = canvas.getContext("2d");
@@ -146,14 +154,13 @@
                     this.shadowColor = "#000";
                     this.shadowBlur = 2;
 
-                    this.speed = width / 200; // 树生长的速度
+                    this.speed = that.width / 200; // 树生长的速度
                     this.generation = 0;
                     this.distance = 0;
                 };
                 Branch.prototype = {
                     // 主要的处理过程发生在这里
                     process: function() {
-                        console.log(this);
                         // 在当前的坐标处画出一个圆形
                         this.draw();
                         // 把当前的branch继续向上延伸一部分
@@ -171,7 +178,6 @@
                         context.beginPath();
                         context.moveTo(this.x, this.y);
                         // 图形是依靠在各个坐标处画出的圆形组合而成
-                        console.log(this.x, this.y, this.radius);
                         context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, true);
                         context.closePath();
                         context.fill();
@@ -186,7 +192,7 @@
                         this.x += deltaX;
                         this.y += deltaY;
                         // 根据当前是第几代，减小半径值
-                        this.radius *= (0.99 - this.generation / 250);
+                        this.radius *= (0.99 - this.generation / 400);
 
                         // 求出距离的增量
                         var deltaDistance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
@@ -207,12 +213,12 @@
                         var splitChance = 0;
                         // 树干部分，长度大于画面高度1/5时开始分叉
                         if (this.generation == 1)
-                            splitChance = this.distance / height - 0.2;
+                            splitChance = this.distance / that.height - 0.2;
                         // 树枝部分
                         else if (this.generation < 3)
-                            splitChance = this.distance / height - 0.1;
+                            splitChance = this.distance / that.height - 0.1;
 
-                        if (Math.random() * 1 < splitChance) {
+                        if (Math.random() * 0.8 < splitChance) {
                             // 下一代生成n个树枝
                             var n = 2 + Math.round(Math.random() * 3);
                             for (var i = 0; i < n; i++) {
@@ -220,7 +226,7 @@
                                 branch.x = this.x;
                                 branch.y = this.y;
                                 branch.angle = this.angle;
-                                branch.radius = this.radius * 0.85;
+                                branch.radius = this.radius * 0.8;
                                 branch.generation++;
                                 branch.fillStyle = this.fillStyle;
 
@@ -259,24 +265,17 @@
                                 this.branches.splice(b, 1);
                     }
                 }
-                var width = window.innerWidth;
-                var height = window.innerHeight;
-                var canvas = document.getElementById("tree");
-                canvas.width = width;
-                canvas.height = height;
-
-                // 设置初始的数量
-                // var n = 2 + Math.random() * 3;
+                var canvas = that.canvas;
 
                 // 设定初始的半径大小
-                var initialRadius = width / 50;
+                var initialRadius = that.width / 50;
 
                 // 新建一个集合用于放置所有的branch
                 branches = new BranchCollection();
                 branch = new Branch();
                 // 以canvas的中点为基准，左右各占一个initialRadius的宽度
                 // 根据序号i算出初始x坐标
-                branch.x = width / 2 - initialRadius;
+                branch.x = that.width / 2 - initialRadius;
                 branch.radius = initialRadius;
                 // 将新的branch加入集合中去
                 branches.add(branch);
