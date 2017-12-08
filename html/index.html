@@ -6,6 +6,21 @@
     <title>Vue list</title>
     <link href="https://cdn.jsdelivr.net/npm/animate.css@3.5.1" rel="stylesheet" type="text/css">
     <style type="text/css">
+    @font-face {
+        font-family: 'iconfont';
+        src: url('../css/fonts/TrixieCyr.eot');
+        src: url('../css/fonts/TrixieCyr.eot?#iefix') format('embedded-opentype'),
+            url('../css/fonts/TrixieCyr-Plain.otf') format('otf'),
+            url('../css/fonts/TrixieCyr.woff2') format('woff2'),
+            url('../css/fonts/TrixieCyr.woff') format('woff'),
+            url('../css/fonts/TrixieCyr.ttf') format('truetype'),
+            url('../css/fonts/TrixieCyr.svg#iconfont') format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    .trixie {
+        font-family: "iconfont";
+    }
     body {
         margin: 0;
         padding: 0;
@@ -17,6 +32,33 @@
       left: 0;
       width: 100%;
       height: 100%;
+      z-index: -1;
+    }
+    #flip-list button {
+        display: block;
+        margin: 20px auto;
+        color: #903;
+        font-weight: bold;
+        user-select: none;
+        padding: .4em .6em .7em .6em;
+        outline: none;
+        border-top: 1px solid #fffc;
+        text-shadow: rgba(255,255,255,.5) 0 1px 0;
+        border-radius: 5em 1em / 5em 1em;
+        box-shadow: inset rgba(255,254,255,0.6) 0 0.3em .3em, inset rgba(0,0,0,0.15) 0 -0.1em .3em, /* inner shadow */ hsl(340, 70%, 50%) 0 .1em 3px, hsl(340, 80%, 40%) 0 .3em 1px, /* color border */ rgba(0,0,0,0.2) 0 .5em 5px;
+        background-image: -webkit-gradient(radial, 50% 0, 100, 50% 0, 0, from( #fff0 ), to( #ffffffb3 )), url(noise.png);
+    }
+    #flip-list ul {
+        display: flex;
+    }
+    #flip-list li {
+        width: 9%;
+        margin: 10px;
+        font-size: 24px;
+        text-align: center;
+        list-style: none;
+        border-radius: 50%;
+        border: 1px solid pink;
     }
     .flip-list-move {
         transition: transform 1s;
@@ -29,13 +71,11 @@
     </style>
 </head>
 
-<body>
-    <div id="flip-list-demo" class="demo">
-        <button v-on:click="shuffle">Shuffle</button>
+<body class="trixie">
+    <div id="flip-list" class="demo">
+        <button class="trixie" @click="shuffle">Shuffle</button>
         <transition-group name="flip-list" tag="ul">
-            <li v-for="item in items" v-bind:key="item">
-                {{ item }}
-            </li>
+            <li v-for="item in items" v-bind:key="item">{{ item }}</li>
         </transition-group>
         <canvas id="tree"></canvas>
     </div>
@@ -43,17 +83,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.14.1/lodash.min.js"></script>
     <script>
     new Vue({
-        el: '#flip-list-demo',
+        el: '#flip-list',
         data: {
             show: true,
-            items: ['px到rem对于移动端的适配', 'H5中canvas绘图', 'PHP代码对ajax请求的中转',
-                '百度地图定位功能', '天气数据获取', '移动视频播放知识点', '微信jdk开发', 'webpack相关', 'cms模板'
-            ],
+            items: ['px TO rem', 'H5\'s canvas', 'PHP and ajax','BMap', 'weather', 'video', 'wx SDK', 'webpack && vue', 'cms', 'CSS && sass'],
             number: 1,
             family: []
         },
         mounted() {
-            this.drawCanvas()
+            // this.drawCanvas()
         },
         methods: {
             shuffle: function() {
@@ -72,7 +110,7 @@
                     this.shadowColor = "#000";
                     this.shadowBlur = 2;
 
-                    this.speed = width / 500;
+                    this.speed = width / 200; // 树生长的速度
                     this.generation = 0;
                     this.distance = 0;
                 };
@@ -80,6 +118,7 @@
                 Branch.prototype = {
                     // 主要的处理过程发生在这里
                     process: function() {
+                        console.log(this);
                         // 在当前的坐标处画出一个圆形
                         this.draw();
                         // 把当前的branch继续向上延伸一部分
@@ -90,7 +129,6 @@
 
                     draw: function() {
                         var context = this.context;
-                        console.log(this.x, this.y, this.radius);
                         context.save();
                         context.fillStyle = this.fillStyle;
                         context.shadowColor = this.shadowColor;
@@ -98,6 +136,7 @@
                         context.beginPath();
                         context.moveTo(this.x, this.y);
                         // 图形是依靠在各个坐标处画出的圆形组合而成
+                        console.log(this.x, this.y, this.radius);
                         context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, true);
                         context.closePath();
                         context.fill();
@@ -113,7 +152,6 @@
                         this.y += deltaY;
                         // 根据当前是第几代，减小半径值
                         this.radius *= (0.99 - this.generation / 250);
-                        console.log(this.generation, this.radius)
 
                         // 求出距离的增量
                         var deltaDistance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
@@ -139,8 +177,7 @@
                         else if (this.generation < 3)
                             splitChance = this.distance / height - 0.1;
 
-                        if (Math.random() * 1.5 < splitChance) {
-                            console.log(Math.random() * 1.5, splitChance, '-----------')
+                        if (Math.random() * 1 < splitChance) {
                             // 下一代生成n个树枝
                             var n = 2 + Math.round(Math.random() * 3);
                             for (var i = 0; i < n; i++) {
@@ -154,7 +191,6 @@
 
                                 // 将branch加入到集合中去
                                 branches.add(branch);
-                                console.log(this.x, this.y, this.angle)
                             }
                             // 将父代branch删去
                             branches.remove(this);
@@ -221,9 +257,6 @@
                     }
 
                 }, 100);
-
-
-
             }
         }
     })
