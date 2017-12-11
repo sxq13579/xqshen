@@ -51,16 +51,10 @@
         border-top: 1px solid #fffc;
         text-shadow: rgba(255, 255, 255, .5) 0 1px 0;
         border-radius: 5em 1em / 5em 1em;
-        box-shadow: inset rgba(255, 254, 255, 0.6) 0 0.3em .3em, inset rgba(0, 0, 0, 0.15) 0 -0.1em .3em, /* inner shadow */
-        hsl(340, 70%, 50%) 0 .1em 3px, hsl(340, 80%, 40%) 0 .3em 1px, /* color border */
-        rgba(0, 0, 0, 0.2) 0 .5em 5px;
-        background-image: -webkit-gradient(radial, 50% 0, 100, 50% 0, 0, from( #fff0), to( #ffffffb3)), url(noise.png);
     }
-
     #flip-list ul {
         display: flex;
     }
-
     #flip-list li {
         position: relative;
         width: 9%;
@@ -70,6 +64,18 @@
         list-style: none;
         border-radius: 50%;
         border: 1px solid pink;
+    }
+    #flip-list li,
+    #flip-list button {
+        box-shadow: inset rgba(255, 254, 255, 0.6) 0 0.3em .3em, inset rgba(0, 0, 0, 0.15) 0 -0.1em .3em, /* inner shadow */
+        hsl(340, 70%, 50%) 0 .1em 3px, hsl(340, 80%, 40%) 0 .3em 1px, /* color border */
+        rgba(0, 0, 0, 0.2) 0 .5em 5px;
+        background-image: -webkit-gradient(radial, 50% 0, 100, 50% 0, 0, from( #fff0), to( #ffffffb3));
+    }
+    #flip-list li a {
+        display: inline-block;
+        color: #903;
+        text-decoration: none;
     }
 
     .flip-list-move {
@@ -87,7 +93,7 @@
     <div id="flip-list" class="demo">
         <button class="trixie" @click="shuffle">Shuffle</button>
         <transition-group name="flip-list" tag="ul">
-            <li v-for="item in items" v-bind:key="item">{{ item }}</li>
+            <li v-for="item in items" :key="item"><a :href="item.link" target=_blank v-text="item.name"></a></li>
         </transition-group>
     </div>
     <canvas id="tree"></canvas>
@@ -98,51 +104,104 @@
         el: '#flip-list',
         data: {
             show: true,
-            items: ['px TO rem', 'H5\'s canvas', 'PHP and ajax', 'BMap', 'weather', 'video', 'wx SDK', 'webpack && vue', 'cms', 'CSS && sass'],
+            items: [{
+                name: 'px TO rem',
+                link: 'https://sxq13579.github.io/2017/12/09/px-TO-rem/'
+            }, {
+                name: 'H5\'s canvas',
+                link: 'https://sxq13579.github.io/2017/12/10/html5-canvas/'
+            }, {
+                name: 'PHP and ajax',
+                link: 'https://sxq13579.github.io/2017/12/10/PHP-%E4%B8%AD%E8%BD%AC/'
+            }, {
+                name: 'BMap',
+                link: 'https://sxq13579.github.io/2017/12/10/Bmap/'
+            }, {
+                name: 'weather',
+                link: 'https://sxq13579.github.io/2017/12/09/%E5%A4%A9%E6%B0%94%E6%8E%A5%E5%8F%A3/'
+            }, {
+                name: 'video',
+                link: 'https://sxq13579.github.io/2017/12/10/html5-video/'
+            }, {
+                name: 'wx SDK',
+                link: 'https://sxq13579.github.io/2017/12/10/WX-sdk/'
+            }, {
+                name: 'websocket',
+                link: 'https://sxq13579.github.io/2017/12/10/websocket/'
+            }, {
+                name: 'cms',
+                link: 'https://sxq13579.github.io/2017/12/10/cms/'
+            }, {
+                name: 'login',
+                link: 'https://sxq13579.github.io/2017/12/09/login%E7%9F%A5%E8%AF%86%E7%82%B9/'
+            }],
             liItems: [],
             width: window.innerWidth,
             height: window.innerHeight,
-            canvas: document.getElementById("tree")
+            canvas: document.getElementById("tree"),
+            pointArr: []
         },
         mounted() {
             this.$nextTick(() => {
                 this.canvas.width = this.width;
                 this.canvas.height = this.height;
                 this.pageInit();
-                this.drawCanvas()
             })
         },
         methods: {
+            // 页面初始化
             pageInit: function() {
                 let that = this;
                 document.querySelectorAll('#flip-list li').forEach(function(item) {
                     let pointX = item.offsetLeft + item.offsetWidth / 2;
-                    let pointY = item.offsetTop + item.offsetHeight / 2;
+                    let pointY = item.offsetTop + item.offsetHeight;
                     that.liItems.push({
                         x: pointX,
                         y: pointY
                     });
-                    that.drawPoints(pointX, pointY);
+                    that.drawPoints(pointX, pointY, 1);
                 })
+                that.drawCanvas()
             },
-            drawPoints(pointX, pointY) {
+            // 画一个点
+            drawPoints(pointX, pointY, wid) {
                 let cxt = this.canvas.getContext("2d");
                 cxt.save();
-                cxt.fillStyle = '#f00';
+                cxt.fillStyle = '#903';
                 cxt.beginPath();
                 cxt.moveTo(pointX, pointY);
                 // 图形是依靠在各个坐标处画出的圆形组合而成
-                cxt.arc(pointX, pointY, 5, 0, 2 * Math.PI, true);
+                cxt.arc(pointX, pointY, wid, 0, 2 * Math.PI, true);
                 cxt.closePath();
                 cxt.fill();
                 cxt.restore();
             },
+             // 画一个点
+            drawLine(px1, py1, px2, py2) {
+                let cxt = this.canvas.getContext("2d");
+                cxt.save();
+                cxt.beginPath();
+                cxt.moveTo(px1, py1);
+                cxt.quadraticCurveTo(px1 + 50, (py1 + py2)/2, px2, py2);
+                cxt.strokeStyle = "pink";
+                cxt.lineWidth = 2;
+                cxt.stroke();
+                cxt.restore();
+            },
+            // 使得列表乱序
             shuffle: function() {
                 this.items = _.shuffle(this.items)
             },
+            compare (proper){
+                 return function(obj1,obj2){
+                     let value1 = obj1[proper];
+                     let value2 = obj2[proper];
+                     return value1 - value2;     // 升序
+                 }
+            },
             drawCanvas() {
                 let that = this;
-                var Branch = function() {
+                let Branch = function() {
                     this.canvas = canvas;
                     this.context = canvas.getContext("2d");
                     this.x = canvas.width / 2;
@@ -150,11 +209,11 @@
                     this.radius = 10;
                     this.angle = Math.PI / 2;
 
-                    this.fillStyle = "#000";
-                    this.shadowColor = "#000";
+                    this.fillStyle = "#A0522D";
+                    this.shadowColor = "#A0522D";
                     this.shadowBlur = 2;
 
-                    this.speed = that.width / 200; // 树生长的速度
+                    this.speed = that.width / 300; // 树生长的速度
                     this.generation = 0;
                     this.distance = 0;
                 };
@@ -170,65 +229,71 @@
                     },
 
                     draw: function() {
-                        var context = this.context;
-                        context.save();
-                        context.fillStyle = this.fillStyle;
-                        context.shadowColor = this.shadowColor;
-                        context.shadowBlur = this.shadowBlur;
-                        context.beginPath();
-                        context.moveTo(this.x, this.y);
+                        let cxt = this.context;
+                        cxt.save();
+                        cxt.fillStyle = this.fillStyle;
+                        cxt.shadowColor = this.shadowColor;
+                        cxt.shadowBlur = this.shadowBlur;
+                        cxt.beginPath();
+                        cxt.moveTo(this.x, this.y);
                         // 图形是依靠在各个坐标处画出的圆形组合而成
-                        context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, true);
-                        context.closePath();
-                        context.fill();
-                        context.restore();
+                        cxt.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, true);
+                        cxt.closePath();
+                        cxt.fill();
+                        cxt.restore();
                     },
 
                     iterate: function() {
-                        var deltaX = this.speed * Math.cos(this.angle);
-                        var deltaY = -this.speed * Math.sin(this.angle);
+                        let deltaX = this.speed * Math.cos(this.angle);
+                        let deltaY = -this.speed * Math.sin(this.angle);
 
                         // 利用speed控制需要向上延伸的距离
                         this.x += deltaX;
                         this.y += deltaY;
                         // 根据当前是第几代，减小半径值
-                        this.radius *= (0.99 - this.generation / 400);
-
+                        this.radius *= (0.99 - this.generation / 75);
                         // 求出距离的增量
-                        var deltaDistance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
-
+                        let deltaDistance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
                         // distance指的是当前的这一段树枝的长度
                         this.distance += deltaDistance;
-
                         // 控制speed的大小，使绘图时不至于在两个圆之间出现空白
                         if (this.speed > this.radius * 1.5) {
                             this.speed = this.radius * 1.5;
                         }
-
+                        if (this.y > that.height) {
+                            this.y = that.height - 10;
+                        }
                         // 产生一个范围在（-0.1, 0.1)之间的随机数,对角度进行一个偏转
-                        this.angle += Math.random() / 5 - 1 / 5 / 2;
+                        this.angle += Math.random() * 2 / 5 - 1 / 5;
                     },
 
                     split: function() {
-                        var splitChance = 0;
+                        let splitChance = 0;
                         // 树干部分，长度大于画面高度1/5时开始分叉
-                        if (this.generation == 1)
+                        if (this.generation === 1) {
                             splitChance = this.distance / that.height - 0.2;
                         // 树枝部分
-                        else if (this.generation < 3)
+                        } else if (this.generation < 3)
                             splitChance = this.distance / that.height - 0.1;
 
-                        if (Math.random() * 0.8 < splitChance) {
+                        if (Math.random() < splitChance) {
                             // 下一代生成n个树枝
-                            var n = 2 + Math.round(Math.random() * 3);
-                            for (var i = 0; i < n; i++) {
-                                var branch = new Branch();
+                            let n = 2 + Math.round(Math.random() * 3);
+                            for (let i = 0; i < n; i++) {
+                                let branch = new Branch();
                                 branch.x = this.x;
                                 branch.y = this.y;
                                 branch.angle = this.angle;
-                                branch.radius = this.radius * 0.8;
+                                branch.radius = this.radius * 0.9;
                                 branch.generation++;
-                                branch.fillStyle = this.fillStyle;
+                                if (branch.radius < 5) {
+                                    let color = '#00' + parseInt(150 * (1 - branch.radius / 10)).toString(16) + '00';
+                                    console.log(branch.radius, color)
+                                    branch.fillStyle = color;
+                                    branch.shadowColor = color;
+                                } else {
+                                    branch.fillStyle = this.fillStyle;
+                                }
 
                                 // 将branch加入到集合中去
                                 branches.add(branch);
@@ -238,12 +303,12 @@
                         }
                     },
                     die: function() {
-                        if (this.radius < 5) {
+                        if (this.radius < 1) {
                             branches.remove(this);
                         }
                     }
                 }
-                var BranchCollection = function() {
+                let BranchCollection = function() {
                     this.branches = [];
                     this.canvas = canvas;
                 };
@@ -251,43 +316,52 @@
                     add: function(branch) {
                         this.branches.push(branch);
                     },
-
                     // 依次处理集合内的每一个元素
                     process: function() {
-                        for (var b in this.branches) {
+                        for (let b in this.branches) {
+                            if(b == this.branches.length - 1) {
+                                that.pointArr.push(this.branches[b]);
+                            }
                             this.branches[b].process();
                         }
                     },
-
                     remove: function(branch) {
-                        for (var b in this.branches)
+                        for (let b in this.branches)
                             if (this.branches[b] === branch)
                                 this.branches.splice(b, 1);
                     }
                 }
-                var canvas = that.canvas;
-
+                let canvas = that.canvas;
                 // 设定初始的半径大小
-                var initialRadius = that.width / 50;
-
+                let initialRadius = that.width / 50;
                 // 新建一个集合用于放置所有的branch
                 branches = new BranchCollection();
                 branch = new Branch();
                 // 以canvas的中点为基准，左右各占一个initialRadius的宽度
                 // 根据序号i算出初始x坐标
-                branch.x = that.width / 2 - initialRadius;
+                branch.x = that.width/2 - initialRadius +  2 * initialRadius;
                 branch.radius = initialRadius;
                 // 将新的branch加入集合中去
                 branches.add(branch);
-
-                var interval = setInterval(function() {
+                let interval = setInterval(function() {
                     // 对集合内的每个元素依次进行处理
                     branches.process();
                     if (branches.branches.length == 0) {
                         clearInterval(interval);
+                        let sortObj = [...new Set(that.pointArr)].sort(that.compare("x"));
+                        let objLen = parseInt(sortObj.length / 10);
+                        let drawNum = 0;
+                        sortObj.forEach(function(item, index) {
+                            if(index % objLen === 0) {
+                                if (item.y < that.height * 3 / 5 && drawNum < 10) {
+                                    that.drawPoints(item.x, item.y, 5)
+                                    that.drawLine(item.x, item.y, that.liItems[drawNum].x, that.liItems[drawNum].y);
+                                    drawNum++;
+                                }
+                            }
+                        })
                     }
-
-                }, 100);
+                }, 30);
             }
         }
     })
