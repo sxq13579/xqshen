@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Node</title>
+</head>
+<body>
+    <header>
+        <div>Node</div>
+        <span>I am smart and pretty, so my name is SandPgirl</span>
+    </header>
+    <section id="node">
+        <div class="left">
+            <input type="text" name="name">
+            <ul>
+                <li v-for="item in list" v-text="item.name"></li>
+            </ul>
+        </div>
+        <div class="main">
+            <ul>
+                <li v-for="info if details">
+                    <h1 v-text="info.name"></h1>
+                    <span v-text="info.property"></span>
+                    <div v-text="indo.explain"></div>
+                </li>
+            </ul>
+        </div>
+    </section>
+    <script src="../js/vue.js"></script>
+    <script>
+        let Node = new Vue({
+            el: '#node',
+            data: {
+                list: [
+                    {name: 'Assert-断言', path: '../js/assert.js'},
+                    {name: 'Buffer-缓冲器', path: '../js/buffer.js'}
+                ],
+            }
+        })
+    </script>
+</body>
+</html>
